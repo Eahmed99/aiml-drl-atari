@@ -1,0 +1,1 @@
+# paper notes, equations, implementation mapping
