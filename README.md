@@ -1,122 +1,56 @@
-# Playing Atari with Deep Reinforcement Learning
+# Atari DQN assignment
 
-BITS Pilani DRL Assignment Problem II — educational implementation and paper presentation.
-Assigned paper: [Mnih et al. (2013), arXiv:1312.5602](https://arxiv.org/abs/1312.5602).
-Group number is not yet confirmed. Problem II is assigned to groups 41–80.
+A compact educational implementation of [Playing Atari with Deep Reinforcement Learning (Mnih et al., 2013)](https://arxiv.org/abs/1312.5602), using Breakout. The assignment deliverables are the paper presentation and group recording; this code supplies a small demonstration and measured evidence.
 
-## What is implemented
+## Code
 
-Breakout image observations → grayscale 84×84 frames → four-frame stack → the existing
-two-convolution CNN → epsilon-greedy actions → uniform replay → same-network TD targets
-→ MSE → RMSprop updates. No separate periodically synchronized target network or Double DQN.
-
-Training saves a checkpoint, original episode scores, clipped training returns, loss logs,
-configuration, versions and timing. Evaluation compares the checkpoint with random actions
-on matching environment seeds and records short gameplay clips. A changing TD loss alone
-is not evidence that the policy improves.
-
-GitHub Actions runs tests and smoke training on branch pushes. To request a fresh full experiment
-in Actions, include `[experiment]` in a commit message. Ordinary documentation/evidence updates
-do not need to repeat the 100,000-step experiment.
-
-## Setup
-
-Use Python 3.11 or 3.12 in a virtual environment. CPU is supported; CUDA is selected when available.
-These versions are a practical setup choice, not a claim about the paper's environment.
-
-```bash
-git clone --branch replay_buffer_branch https://github.com/Eahmed99/aiml-drl-atari.git
-cd aiml-drl-atari
-python -m venv .venv
-# macOS/Linux:
-source .venv/bin/activate
-# Windows PowerShell instead: .venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-```
-
-ALE installation help: https://ale.farama.org/getting-started/ . If Breakout cannot find its ROM,
-follow the instructions for your installed ALE version. Do not use obsolete ROM commands blindly.
-
-## Run in order from repository root
-
-```bash
-python -m unittest discover -s tests -v
-python -m src.dqn
-python -m src.replay_buffer
-python -m src.environment_demo
-python -m src.train --config config/smoke.json --out results/smoke
-python -m src.train --config config/breakout.json --out results/breakout
-python -m src.evaluate --checkpoint results/breakout/checkpoint.pt --out results/evaluation --episodes 10
-python -m src.plot_results --run results/breakout --evaluation results/evaluation
-python scripts/build_presentation.py --group YOUR_GROUP --video-link YOUR_DRIVE_LINK
-```
-
-Use a NEW output directory for each experiment; logs are never silently overwritten.
-Training checkpoints contain model weights and experiment settings for evaluation, not resumable
-optimizer/replay state. The 2,000-step smoke run validates execution; the 100,000-step run is a
-reduced-budget experiment and may not beat random. Increase `total_steps` and `epsilon_decay_steps`
-together for longer experiments, recording every setting. Do not tune on evaluation seeds.
-
-## Files
-
-| Path | Purpose |
+| File | Purpose |
 |---|---|
-| `src/dqn.py` | Your original network, retained |
-| `src/replay_buffer.py` | Bounded replay, ownership-safe uint8 copies |
-| `src/environment.py` | Shared preprocessing, stack and FIRE helper |
-| `src/agent.py` | TD target and gradient update |
-| `src/train.py` | Interaction, learning, CSV logs and weights |
-| `src/evaluate.py` | Random baseline, policy evaluation, MP4 clips |
-| `src/plot_results.py` | Plots from actual CSVs |
-| `src/environment_demo.py` | Screenshots and input/network evidence |
-| `notebooks/dqn_atari_demo.ipynb` | Notebook calling the modules |
-| `config/` | Smoke and experiment JSON settings |
-| `docs/` | Assignment checklist, deviations, presentation and contributor evidence |
-| `scripts/build_presentation.py` | Generate PPTX; embeds results when available |
-| `tests/` | Replay, configuration, TD target and parameter-update checks |
+| `src/dqn.py` | Convolutional Q network |
+| `src/replay_buffer.py` | Seeded replay buffer |
+| `src/train.py` | Environment, learning loop, settings, screenshots and plots |
+| `src/evaluate.py` | Checkpoint versus random-policy evaluation and gameplay clips |
 
-## Experiment protocol and limitations
+The notebook runs these same commands. Training defaults are inside `train.py`; optional `--config PATH` accepts an external JSON configuration.
 
-Step units are agent actions after frame skip 4; emulator frames also include reset no-ops and
-launch actions. Training clips rewards but logs original rewards separately. `terminated` masks
-bootstrapping; `truncated` resets the game without falsely treating time limit as terminal.
-Life loss does not terminate replay transitions. FIRE on reset and after life loss is a disclosed
-game-specific helper used identically for both evaluated policies. Launch reward is logged separately.
+## Run
 
-Replay stores two complete uint8 stacks per transition: 5,000 slots use about 282 MB for pixels,
-plus overhead; 1,000 slots use 56 MB. It is intentionally simple, not a million-frame replay design.
-No claim of paper score reproduction is made. Details: `docs/paper_vs_implementation.md`.
+From the repository root, with your virtual environment active:
 
-## Contributors
-
-| Name | BITS ID | Actual contribution and evidence |
-|---|---|---|
-| Member 1 | FILL PRIVATELY | Fill after actual work; see contributor ledger |
-| Member 2 | FILL PRIVATELY | Fill after actual work |
-| Member 3 | FILL PRIVATELY | Fill after actual work |
-| Member 4 | FILL PRIVATELY | Fill after actual work |
-
-Fill contributor names and BITS IDs privately in the final submission; verify before upload. Generated code
-and presentation material do not establish individual contribution. Each member must understand,
-review and document their actual work; follow your institution's AI assistance policy.
-
-## Submission
-
-See `docs/submission_checklist.md`. Submit PPT and a narrated group presentation recording,
-not just gameplay. The presentation draft has pending experiment/contribution/video fields;
-it is not ready for submission until these are filled. No fabricated scores or contributor claims.
-
-## Completed experiment snapshot
-
-The 100,000-step experiment was executed. Evaluation means: random 1.2, trained 0.4 over
-ten episodes each; improvement was not demonstrated. All eight tests and recovery/evaluation
-passed in Actions. See `docs/experiment_results.md` and `evidence/experiment_100k/`.
-
-Download the full artifact linked in `evidence/experiment_100k/README.md` and extract its
-`results/breakout/checkpoint.pt` to `evidence/experiment_100k/training/checkpoint.pt`. Then
-evaluate the saved native-metadata checkpoint without retraining:
 ```bash
-python -m src.evaluate --checkpoint evidence/experiment_100k/training/checkpoint.pt --out results/snapshot-evaluation --episodes 10
+python -m pip install -r requirements.txt
+python -m src.dqn
+python -m src.train --demo
+python -m src.train --smoke --out results/my-smoke-01
 ```
-The PPT in `submission/` contains actual observed results. Contributor names/IDs, actual work,
-group number and Google Drive recording link remain private-fill placeholders.
+
+The smoke check performs 2,000 agent steps. Each training/evaluation output folder must be new; change its name when repeating a run. Training saves a checkpoint, CSV logs, summary and plots automatically. Screenshots go into `screenshots/`.
+
+For a 100,000-step experiment and evaluation:
+
+```bash
+python -m src.train --out results/breakout
+python -m src.evaluate --checkpoint results/breakout/checkpoint.pt --out results/evaluation --episodes 10
+```
+
+Use `--steps 200000` to override the training duration, or `--device cpu` to select CPU. Evaluation writes random/trained scores, a comparison plot and two short gameplay clips. Use `--video-seconds 0` to skip clips. To regenerate plots:
+
+```bash
+python -m src.train --plot-run results/breakout --evaluation results/evaluation
+```
+
+For help checking your run, share the terminal output, training `summary.json`, `episodes.csv`, `losses.csv`, and evaluation `summary.json` when available.
+
+## Method and limits
+
+The network uses 16 filters (8×8, stride 4), 32 filters (4×4, stride 2), a 256-unit hidden layer and one output per action. Inputs are four grayscale 84×84 frames stored as uint8 and normalized once in the network. Learning uses epsilon-greedy actions, replay, clipped training rewards, detached same-network TD targets, MSE and RMSprop. Actual game scores remain unclipped. True termination masks bootstrapping; a time limit only ends the episode.
+
+This is a small demonstration, not a reproduction of published scores: replay holds 5,000 transitions, training lasts 100,000 agent steps, and preprocessing directly resizes to 84×84 with max-pooling. A shared FIRE helper launches/relaunches Breakout; reset-launch rewards are logged separately. No separate target network is used, consistent with the 2013 algorithm.
+
+## Recorded experiment and submission
+
+`results/previous_run/` preserves the completed experiment's CSVs, plots, screenshots and clips. Across 10 evaluation episodes, random scored **1.2** on average and trained scored **0.4**. This run **did not demonstrate improvement**. Training completed 100,000 agent steps and 24,751 optimizer updates.
+
+The [full experiment artifact](https://github.com/Eahmed99/aiml-drl-atari/actions/runs/37510403976/artifacts/11434816652) contains the checkpoint and complete losses CSV. The committed loss CSV is sampled; its existing plot was generated from all updates.
+
+The results-filled PPT is in `submission/DRL_PlayingAtari_GroupPENDING.pptx`. Before submission, fill the group number, names/BITS IDs privately on the first slide and the Drive recording URL on the last slide. Record every member's actual contribution. Keep the video within 7 minutes and both PPT and video below 10 MB. Explain the paper's motivation, algorithm, results and limitations, and distinguish published results from this short demonstration.

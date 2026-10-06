@@ -6,5 +6,3 @@ matplotlib>=3.8,<4
 opencv-python-headless>=4.9,<5
 imageio>=2.34,<3
 imageio-ffmpeg>=0.5,<1
-python-pptx>=1.0,<2
-nbformat>=5.10,<6
