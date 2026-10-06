@@ -6,7 +6,7 @@ Local checks passed:
 - Parsing of every notebook code cell.
 - Generation and opening of an 11-slide PPTX with speaker notes (about 0.06 MB).
 
-Not executed locally:
+Not executed in the local scratch runtime:
 - PyTorch forward/backward/checkpoint tests.
 - Actual ALE environment check and training/evaluation.
 
@@ -15,6 +15,12 @@ in the restricted execution environment. These checks are available in the added
 workflow and documented local commands. No experiment scores, plots or trained weights are
 represented as completed work. Check Actions status before treating the implementation as
 fully validated.
+
+GitHub Actions run https://github.com/Eahmed99/aiml-drl-atari/actions/runs/37508368286
+successfully ran all seven tests (no skips) and a real 2,000-step Atari smoke run with 376
+optimizer updates. The workflow now also runs the configured 100,000-step experiment,
+evaluation, plotting, screenshot capture and presentation generation. These later results must
+be checked in the corresponding Actions run; smoke execution is not proof of improved policy.
 
 The user's concurrent `code_from_ejaz` commit was retained as the implementation commit's parent.
 Its replay buffer was integrated using a deque, removing the stray shell command, making stored
