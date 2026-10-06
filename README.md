@@ -15,6 +15,10 @@ configuration, versions and timing. Evaluation compares the checkpoint with rand
 on matching environment seeds and records short gameplay clips. A changing TD loss alone
 is not evidence that the policy improves.
 
+GitHub Actions runs tests and smoke training on branch pushes. To request a fresh full experiment
+in Actions, include `[experiment]` in a commit message. Ordinary documentation/evidence updates
+do not need to repeat the 100,000-step experiment.
+
 ## Setup
 
 Use Python 3.11 or 3.12 in a virtual environment. CPU is supported; CUDA is selected when available.

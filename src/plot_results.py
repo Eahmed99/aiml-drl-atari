@@ -29,7 +29,7 @@ def main():
         y = np.array([float(r[ykey]) for r in rows])
         fig, ax = plt.subplots(figsize=(8, 4))
         ax.plot(x, y, alpha=0.4, label="Raw")
-        window = min(20, len(y))
+        window = min(20, max(1, len(y) // 2))
         ax.plot(x[window - 1:], np.convolve(y, np.ones(window) / window, mode="valid"),
                 label=f"{window}-point moving mean")
         ax.set(xlabel="Agent steps", ylabel=ykey, title=title)

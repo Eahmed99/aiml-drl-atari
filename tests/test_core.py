@@ -83,6 +83,21 @@ class LearningTests(unittest.TestCase):
             restored.load_state_dict(torch.load(path, weights_only=True))
             torch.testing.assert_close(model(batch), restored(batch))
 
+    def test_training_checkpoint_metadata(self):
+        import tempfile
+        from pathlib import Path
+        import torch
+        from src.train import run
+        config = load_config(ROOT / "config/smoke.json")
+        config.update(total_steps=40, learning_starts=32, replay_capacity=40,
+                      checkpoint_every=40, log_every=40)
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "run"
+            run(config, output, "cpu")
+            checkpoint = torch.load(output / "checkpoint.pt", weights_only=True)
+            self.assertIs(type(checkpoint["action_count"]), int)
+            self.assertGreater(checkpoint["updates"], 0)
+
 
 @unittest.skipUnless(all(importlib.util.find_spec(name) for name in
                        ("torch", "gymnasium", "ale_py", "cv2")),

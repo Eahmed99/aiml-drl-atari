@@ -38,7 +38,7 @@ def run(config, out, device_name="auto"):
 
     def save_checkpoint(step):
         torch.save({"model": model.state_dict(), "config": config,
-                    "action_count": env.action_space.n, "step": step,
+                    "action_count": int(env.action_space.n), "step": int(step),
                     "updates": updates}, out / "checkpoint.pt")
 
     try:
