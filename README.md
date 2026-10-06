@@ -1,3 +1,12 @@
+# Contributors
+
+| Contributor | BITS ID |
+|---|---|
+| EJAZ AHMED | 2025AG05320 |
+| ARSHAD HUSAIN SIDDIQUI | 2025AG05458 |
+| SAHIL FARAZ ANSARI | 2025AG05719 |
+| SYED ANAS AHMED | 2025AG05726 |
+
 # Atari DQN assignment
 
 A compact educational implementation of [Playing Atari with Deep Reinforcement Learning (Mnih et al., 2013)](https://arxiv.org/abs/1312.5602), using Breakout. The assignment deliverables are the paper presentation and group recording; this code supplies a small demonstration and measured evidence.
