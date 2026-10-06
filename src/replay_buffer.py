@@ -1,210 +1,56 @@
-# replay memory
+"""Experience replay for DQN, extending the group's deque-based implementation.
 
-git remote -v
-# replay memory
-
+Stores (state, action, reward, next_state, terminated) and samples uniform batches.
+Only genuine termination disables bootstrapping; time-limit truncation does not.
 """
-Experience Replay Buffer for DQN.
-
-Stores transitions of the form:
-
-    (state, action, reward, next_state, done)
-
-and allows random mini-batch sampling during training.
-"""
-
-import random
 from collections import deque
-from typing import Tuple
-
 import numpy as np
-import torch
 
 
 class ReplayBuffer:
-    """
-    Fixed-size replay memory for DQN.
-
-    Parameters
-    ----------
-    capacity : int
-        Maximum number of transitions stored in memory.
-        When full, the oldest transition is removed automatically.
-    """
-
-    def __init__(self, capacity: int):
+    def __init__(self, capacity, seed=0):
+        if capacity <= 0:
+            raise ValueError("capacity must be positive")
+        self.capacity = capacity
+        self.rng = np.random.default_rng(seed)
         self.buffer = deque(maxlen=capacity)
 
-    def push(
-        self,
-        state,
-        action,
-        reward,
-        next_state,
-        done
-    ):
-        """
-        Store one transition.
+    def push(self, state, action, reward, next_state, terminated):
+        state, next_state = np.asarray(state), np.asarray(next_state)
+        for frame in (state, next_state):
+            if frame.shape != (4, 84, 84) or frame.dtype != np.uint8:
+                raise ValueError("States must be uint8 arrays with shape (4, 84, 84)")
+        transition = (state.copy(), int(action), float(reward),
+                      next_state.copy(), bool(terminated))
+        self.buffer.append(transition)
 
-        Parameters
-        ----------
-        state
-            Current state.
-        action
-            Action taken in the current state.
-        reward
-            Reward received.
-        next_state
-            State reached after taking the action.
-        done
-            True if the episode ended, otherwise False.
-        """
+    def sample_arrays(self, batch_size):
+        if not 0 < batch_size <= len(self):
+            raise ValueError("batch_size must be between 1 and replay length")
+        indices = self.rng.choice(len(self), batch_size, replace=False)
+        # A deque is not accepted by random.sample on modern Python. A snapshot
+        # also avoids repeated O(n) deque indexing when gathering a batch.
+        population = list(self.buffer)
+        states, actions, rewards, next_states, terminals = zip(
+            *(population[int(i)] for i in indices))
+        return (np.stack(states), np.asarray(actions, dtype=np.int64),
+                np.asarray(rewards, dtype=np.float32), np.stack(next_states),
+                np.asarray(terminals, dtype=np.float32))
 
-        self.buffer.append(
-            (
-                state,
-                action,
-                reward,
-                next_state,
-                done
-            )
-        )
-
-    def sample(
-        self,
-        batch_size: int,
-        device: torch.device
-    ) -> Tuple[
-        torch.Tensor,
-        torch.Tensor,
-        torch.Tensor,
-        torch.Tensor,
-        torch.Tensor
-    ]:
-        """
-        Randomly sample a mini-batch from replay memory.
-
-        Returns
-        -------
-        states
-            Shape: (batch_size, 4, 84, 84)
-
-        actions
-            Shape: (batch_size,)
-
-        rewards
-            Shape: (batch_size,)
-
-        next_states
-            Shape: (batch_size, 4, 84, 84)
-
-        dones
-            Shape: (batch_size,)
-        """
-
-        batch = random.sample(
-            self.buffer,
-            batch_size
-        )
-
-        states, actions, rewards, next_states, dones = zip(*batch)
-
-        states = torch.from_numpy(
-            np.stack(states)
-        ).to(device)
-
-        actions = torch.tensor(
-            actions,
-            dtype=torch.long,
-            device=device
-        )
-
-        rewards = torch.tensor(
-            rewards,
-            dtype=torch.float32,
-            device=device
-        )
-
-        next_states = torch.from_numpy(
-            np.stack(next_states)
-        ).to(device)
-
-        dones = torch.tensor(
-            dones,
-            dtype=torch.float32,
-            device=device
-        )
-
-        return (
-            states,
-            actions,
-            rewards,
-            next_states,
-            dones
-        )
+    def sample(self, batch_size, device="cpu"):
+        import torch
+        return tuple(torch.as_tensor(x, device=device)
+                     for x in self.sample_arrays(batch_size))
 
     def __len__(self):
-        """
-        Return the current number of stored transitions.
-        """
         return len(self.buffer)
 
 
 if __name__ == "__main__":
-
-    buffer = ReplayBuffer(capacity=100)
-
-    # Add 10 fake Atari transitions
-    for i in range(10):
-
-        state = np.random.randint(
-            0,
-            256,
-            size=(4, 84, 84),
-            dtype=np.uint8
-        )
-
-        next_state = np.random.randint(
-            0,
-            256,
-            size=(4, 84, 84),
-            dtype=np.uint8
-        )
-
-        action = np.random.randint(0, 4)
-
-        reward = float(
-            np.random.choice([-1, 0, 1])
-        )
-
-        done = bool(
-            np.random.choice([False, True])
-        )
-
-        buffer.push(
-            state,
-            action,
-            reward,
-            next_state,
-            done
-        )
-
-    print("Replay buffer size:", len(buffer))
-
-    device = torch.device("cpu")
-
-    states, actions, rewards, next_states, dones = \
-        buffer.sample(
-            batch_size=4,
-            device=device
-        )
-
-    print("States shape     :", states.shape)
-    print("Actions shape    :", actions.shape)
-    print("Rewards shape    :", rewards.shape)
-    print("Next states shape:", next_states.shape)
-    print("Dones shape      :", dones.shape)
-
-    print("\nActions:", actions)
-    print("Rewards:", rewards)
-    print("Dones  :", dones)
+    replay = ReplayBuffer(10)
+    for i in range(12):
+        frame = np.full((4, 84, 84), i, dtype=np.uint8)
+        replay.push(frame, i % 4, 1, frame, i == 11)
+    print("Replay length:", len(replay))
+    for x in replay.sample_arrays(4):
+        print(x.shape, x.dtype)

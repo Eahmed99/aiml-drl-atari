@@ -1,0 +1,20 @@
+{
+  "environment": "ALE/Breakout-v5",
+  "seed": 42,
+  "total_steps": 2000,
+  "gamma": 0.99,
+  "learning_rate": 0.00025,
+  "batch_size": 32,
+  "replay_capacity": 1000,
+  "learning_starts": 500,
+  "train_frequency": 4,
+  "epsilon_start": 1.0,
+  "epsilon_end": 0.1,
+  "epsilon_decay_steps": 1500,
+  "sticky_actions": 0.0,
+  "fire_on_reset": true,
+  "max_raw_episode_steps": 10800,
+  "log_every": 250,
+  "checkpoint_every": 1000,
+  "torch_threads": 2
+}
