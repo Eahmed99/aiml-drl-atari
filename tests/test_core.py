@@ -2,7 +2,7 @@ import importlib.util
 import unittest
 import numpy as np
 from src.replay_buffer import ReplayBuffer
-from src.utils import ROOT, load_config, epsilon_at
+from src.train import ROOT, load_config, epsilon_at
 
 
 class ReplayTests(unittest.TestCase):
@@ -52,7 +52,7 @@ class ReplayTests(unittest.TestCase):
 class LearningTests(unittest.TestCase):
     def test_terminal_target(self):
         import torch
-        from src.agent import td_targets
+        from src.train import td_targets
         target = td_targets(torch.tensor([1., 1.]), torch.tensor([[5., 2.], [5., 2.]]),
                             torch.tensor([1., 0.]), 0.99)
         torch.testing.assert_close(target, torch.tensor([1., 5.95]))
@@ -61,7 +61,7 @@ class LearningTests(unittest.TestCase):
         import tempfile
         import torch
         from src.dqn import DQN
-        from src.agent import optimize_model
+        from src.train import optimize_model
         torch.set_num_threads(2)
         torch.manual_seed(1)
         model = DQN(4)
@@ -104,7 +104,7 @@ class LearningTests(unittest.TestCase):
                      "Atari dependencies are not installed")
 class EnvironmentTests(unittest.TestCase):
     def test_real_environment_stack(self):
-        from src.environment import make_env, as_state
+        from src.train import make_env, as_state
         config = load_config(ROOT / "config/smoke.json")
         env = make_env(config)
         try:

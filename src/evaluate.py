@@ -5,8 +5,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from .dqn import DQN
-from .environment import make_env, as_state, life_count, choose_action
-from .utils import get_device, save_json
+from .train import make_env, as_state, life_count, choose_action, get_device, save_json, plot_results
 
 
 def evaluate_policy(config, model, seeds, epsilon, device, out, label, video_seconds):
@@ -90,6 +89,7 @@ def main():
               "checkpoint": str(args.checkpoint), "training_step": checkpoint["step"],
               "epsilon": args.epsilon, "score_units": "unclipped reward excluding reset launch",
               "note": "Environment seeds match; action-dependent trajectories differ."})
+    plot_results(args.checkpoint.parent, args.out)
     print(summary)
 
 
