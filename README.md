@@ -105,3 +105,18 @@ review and document their actual work; follow your institution's AI assistance p
 See `docs/submission_checklist.md`. Submit PPT and a narrated group presentation recording,
 not just gameplay. The presentation draft has pending experiment/contribution/video fields;
 it is not ready for submission until these are filled. No fabricated scores or contributor claims.
+
+## Completed experiment snapshot
+
+The 100,000-step experiment was executed. Evaluation means: random 1.2, trained 0.4 over
+ten episodes each; improvement was not demonstrated. All eight tests and recovery/evaluation
+passed in Actions. See `docs/experiment_results.md` and `evidence/experiment_100k/`.
+
+Download the full artifact linked in `evidence/experiment_100k/README.md` and extract its
+`results/breakout/checkpoint.pt` to `evidence/experiment_100k/training/checkpoint.pt`. Then
+evaluate the saved native-metadata checkpoint without retraining:
+```bash
+python -m src.evaluate --checkpoint evidence/experiment_100k/training/checkpoint.pt --out results/snapshot-evaluation --episodes 10
+```
+The PPT in `submission/` contains actual observed results. Contributor names/IDs, actual work,
+group number and Google Drive recording link remain private-fill placeholders.

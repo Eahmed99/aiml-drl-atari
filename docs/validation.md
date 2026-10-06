@@ -25,3 +25,8 @@ be checked in the corresponding Actions run; smoke execution is not proof of imp
 The user's concurrent `code_from_ejaz` commit was retained as the implementation commit's parent.
 Its replay buffer was integrated using a deque, removing the stray shell command, making stored
 arrays independent copies, validating input shape/dtype and using reproducible uniform sampling.
+
+Final validation: https://github.com/Eahmed99/aiml-drl-atari/actions/runs/37510403976 passed
+all eight tests, strict checkpoint migration/loading, ten-episode evaluation per policy, MP4
+recording, plots and results-filled PPT generation. See docs/experiment_results.md for measured
+outcomes and the checkpoint compatibility issue corrected after training.

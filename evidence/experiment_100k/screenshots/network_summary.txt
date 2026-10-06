@@ -1,0 +1,10 @@
+DQN(
+  (conv1): Conv2d(4, 16, kernel_size=(8, 8), stride=(4, 4))
+  (conv2): Conv2d(16, 32, kernel_size=(4, 4), stride=(2, 2))
+  (fc1): Linear(in_features=2592, out_features=256, bias=True)
+  (fc2): Linear(in_features=256, out_features=4, bias=True)
+)
+Input: (4, 84, 84) uint8
+Q shape: (1, 4)
+Untrained Q values: [[0.010310067795217037, -0.05188903957605362, -0.0203427542001009, -0.050759341567754745]]
+Actions: ['NOOP', 'FIRE', 'RIGHT', 'LEFT']

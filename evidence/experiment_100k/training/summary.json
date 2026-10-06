@@ -1,0 +1,10 @@
+{
+  "completed_steps": 100000,
+  "updates": 24751,
+  "completed_episodes": 563,
+  "last_loss": 0.03558455780148506,
+  "seconds": 517.093506058,
+  "partial_episode_score": 0.0,
+  "partial_episode_steps": 9,
+  "note": "Partial episode excluded from episodes.csv. Steps count agent actions, not raw frames."
+}

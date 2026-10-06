@@ -1,0 +1,39 @@
+{
+  "config": {
+    "environment": "ALE/Breakout-v5",
+    "seed": 42,
+    "total_steps": 100000,
+    "gamma": 0.99,
+    "learning_rate": 0.00025,
+    "batch_size": 32,
+    "replay_capacity": 5000,
+    "learning_starts": 1000,
+    "train_frequency": 4,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.1,
+    "epsilon_decay_steps": 80000,
+    "sticky_actions": 0.0,
+    "fire_on_reset": true,
+    "max_raw_episode_steps": 108000,
+    "log_every": 1000,
+    "checkpoint_every": 10000,
+    "torch_threads": 2
+  },
+  "seeds": [
+    1000,
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008,
+    1009
+  ],
+  "checkpoint": "results/breakout/checkpoint.pt",
+  "training_step": 100000,
+  "epsilon": 0.05,
+  "score_units": "unclipped reward excluding reset launch",
+  "note": "Environment seeds match; action-dependent trajectories differ."
+}

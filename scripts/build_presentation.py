@@ -107,6 +107,10 @@ def build(group, video_link, run, evaluation, output):
                          f"sample SD={data[label]['std']}; n={data[label]['episodes']}"
                          for label in ("random", "trained"))
         body += "\nCompare evaluated scores, not TD loss alone.\nSmall sample; no full benchmark reproduction claim."
+        if data["trained"]["mean"] <= data["random"]["mean"]:
+            body += "\nThis run did not demonstrate improvement over random play."
+        else:
+            body += "\nHigher observed mean; more training seeds needed to assess reliability."
     else:
         body = "PENDING: run training and evaluation.\nNo scores have been invented.\n"
         body += "Show original score curves, evaluation mean/SD and gameplay.\n"
