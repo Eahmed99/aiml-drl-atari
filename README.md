@@ -9,22 +9,24 @@
 
 # Atari DQN assignment
 
-A compact educational implementation of [Playing Atari with Deep Reinforcement Learning (Mnih et al., 2013)](https://arxiv.org/abs/1312.5602), using Breakout. The assignment deliverables are the paper presentation and group recording; this code supplies a small demonstration and measured evidence.
+This repository contains a small Breakout experiment based on [Playing Atari with Deep Reinforcement Learning, Mnih et al. (2013)](https://arxiv.org/abs/1312.5602). It covers the main DQN steps: processing game frames, choosing actions, storing experience and updating the Q network.
 
-## Code
+The code and results support the paper presentation and group recording.
+
+## Files
 
 | File | Purpose |
 |---|---|
-| `src/dqn.py` | Convolutional Q network |
-| `src/replay_buffer.py` | Seeded replay buffer |
-| `src/train.py` | Environment, learning loop, settings, screenshots and plots |
-| `src/evaluate.py` | Checkpoint versus random-policy evaluation and gameplay clips |
+| `src/dqn.py` | CNN that predicts a Q-value for each action |
+| `src/replay_buffer.py` | Stores transitions and samples random batches |
+| `src/train.py` | Environment setup, training, screenshots and plots |
+| `src/evaluate.py` | Compares the checkpoint with random play and records clips |
 
-The notebook runs these same commands. Training defaults are inside `train.py`; optional `--config PATH` accepts an external JSON configuration.
+The notebook runs the same code. Settings are in `DEFAULT_CONFIG` and `SMOKE_CONFIG` inside `train.py`. Both use a replay capacity of 5,000 transitions.
 
-## Run
+## Run the code
 
-From the repository root, with your virtual environment active:
+Run these commands from the repository root with the virtual environment active:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -33,33 +35,66 @@ python -m src.train --demo
 python -m src.train --smoke --out results/my-smoke-01
 ```
 
-The smoke check performs 2,000 agent steps. Each training/evaluation output folder must be new; change its name when repeating a run. Training saves a checkpoint, CSV logs, summary and plots automatically. Screenshots go into `screenshots/`.
+The smoke run takes 2,000 agent steps and checks that training executes. It saves the checkpoint, logs, summary and plots. The demo saves the game screen and four-frame input in `screenshots/`.
 
-For a 100,000-step experiment and evaluation:
+Use a new output folder for each training or evaluation run. For example, change `my-smoke-01` to `my-smoke-02` when running it again.
+
+For the default 100,000-step run:
 
 ```bash
 python -m src.train --out results/breakout
 python -m src.evaluate --checkpoint results/breakout/checkpoint.pt --out results/evaluation --episodes 10
 ```
 
-Use `--steps 200000` to override the training duration, or `--device cpu` to select CPU. Evaluation writes random/trained scores, a comparison plot and two short gameplay clips. Use `--video-seconds 0` to skip clips. To regenerate plots:
+Evaluation saves scores for both policies, a comparison plot and short gameplay clips.
+
+Useful options:
+
+- `--steps 200000`: change the number of training steps.
+- `--device cpu`: run on CPU.
+- `--video-seconds 0`: skip clips during evaluation.
+- `--config PATH`: load settings from an external JSON file.
+
+To redraw the plots:
 
 ```bash
 python -m src.train --plot-run results/breakout --evaluation results/evaluation
 ```
 
-For help checking your run, share the terminal output, training `summary.json`, `episodes.csv`, `losses.csv`, and evaluation `summary.json` when available.
+## Training setup
 
-## Method and limits
+The input is four grayscale 84×84 frames. The network has two convolutional layers with 16 and 32 filters, a 256-unit hidden layer and one output per action. Pixels stay as uint8 in replay and are divided by 255 in the network.
 
-The network uses 16 filters (8×8, stride 4), 32 filters (4×4, stride 2), a 256-unit hidden layer and one output per action. Inputs are four grayscale 84×84 frames stored as uint8 and normalized once in the network. Learning uses epsilon-greedy actions, replay, clipped training rewards, detached same-network TD targets, MSE and RMSprop. Actual game scores remain unclipped. True termination masks bootstrapping; a time limit only ends the episode.
+Actions follow an epsilon-greedy policy. Epsilon decreases from 1.0 to 0.1 during the default run. Training uses batches of 32, gamma 0.99, RMSprop and MSE loss. Rewards are clipped for learning; the reported scores use the original rewards.
 
-This is a small demonstration, not a reproduction of published scores: replay holds 5,000 transitions, training lasts 100,000 agent steps, and preprocessing directly resizes to 84×84 with max-pooling. A shared FIRE helper launches/relaunches Breakout; reset-launch rewards are logged separately. No separate target network is used, consistent with the 2013 algorithm.
+The TD target uses the same network, with gradients disabled for the next-state prediction. There is no separate target network. A true terminal state removes the future-reward term; a time limit ends the episode without removing that term.
 
-## Recorded experiment and submission
+Breakout needs FIRE to launch the ball. The environment helper launches it on reset and the action-selection code relaunches it after a life loss. Rewards from the reset launch are recorded separately.
 
-`results/previous_run/` preserves the completed experiment's CSVs, plots, screenshots and clips. Across 10 evaluation episodes, random scored **1.2** on average and trained scored **0.4**. This run **did not demonstrate improvement**. Training completed 100,000 agent steps and 24,751 optimizer updates.
+## Results
 
-The [full experiment artifact](https://github.com/Eahmed99/aiml-drl-atari/actions/runs/37510403976/artifacts/11434816652) contains the checkpoint and complete losses CSV. The committed loss CSV is sampled; its existing plot was generated from all updates.
+The saved experiment is in `results/previous_run/`. It completed 100,000 agent steps and 24,751 network updates.
 
-The results-filled PPT is in `submission/DRL_PlayingAtari_GroupPENDING.pptx`. Before submission, fill the group number, names/BITS IDs privately on the first slide and the Drive recording URL on the last slide. Record every member's actual contribution. Keep the video within 7 minutes and both PPT and video below 10 MB. Explain the paper's motivation, algorithm, results and limitations, and distinguish published results from this short demonstration.
+| Policy | Mean score | Evaluation episodes |
+|---|---:|---:|
+| Random | 1.2 | 10 |
+| Trained | 0.4 | 10 |
+
+The trained policy scored below random play in this run. The experiment confirms that the code executes and updates the network, but it does not show improved gameplay. TD loss alone cannot establish better performance.
+
+This run uses one game, a short training budget and a replay capacity of 5,000. The preprocessing also differs from the original paper: Gymnasium resizes directly to 84×84 and applies max-pooling. These results should be presented separately from the paper's benchmark results.
+
+The [full experiment artifact](https://github.com/Eahmed99/aiml-drl-atari/actions/runs/37510403976/artifacts/11434816652) includes the checkpoint and complete loss log. The committed `losses_sampled.csv` contains every 100th update and the final row; the saved loss plot uses all updates.
+
+## Presentation
+
+The slides are in `submission/DRL_PlayingAtari_GroupPENDING.pptx`.
+
+Before submitting:
+
+- Fill the group number and names/BITS IDs on the first slide.
+- Add each member's actual contribution and supporting evidence.
+- Put the accessible Drive recording link on the last slide.
+- Keep the recording within 7 minutes and both the PPT and video below 10 MB.
+
+Explain the paper's motivation, algorithm, results and limitations. Use the screenshots, logs and clips to explain this experiment.

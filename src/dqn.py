@@ -1,4 +1,4 @@
-# neural network + possibly action selection logic
+"""Q network for four stacked Atari frames."""
 
 import torch
 import torch.nn as nn
@@ -9,9 +9,7 @@ class DQN(nn.Module):
     def __init__(self, num_actions: int):
         super().__init__()
 
-        # First convolutional layer
-        # Input: 4 x 84 x 84
-        # Output: 16 feature maps
+        # Input: four grayscale 84x84 frames.
         self.conv1 = nn.Conv2d(
             in_channels=4,
             out_channels=16,
@@ -19,7 +17,6 @@ class DQN(nn.Module):
             stride=4
         )
 
-        # Second convolutional layer
         self.conv2 = nn.Conv2d(
             in_channels=16,
             out_channels=32,
@@ -27,15 +24,7 @@ class DQN(nn.Module):
             stride=2
         )
 
-        # After convolution:
-        # 84x84
-        #   ↓ Conv1
-        # 20x20
-        #   ↓ Conv2
-        # 9x9
-        #
-        # therefore:
-        # 32 * 9 * 9 = 2592
+        # The convolutions leave 32 feature maps of size 9x9.
         self.fc1 = nn.Linear(
             32 * 9 * 9,
             256
@@ -48,23 +37,9 @@ class DQN(nn.Module):
         )
 
     def forward(self, x):
-        """
-        Forward pass.
+        """Return action Q-values for a batch shaped (N, 4, 84, 84)."""
 
-        Parameters
-        ----------
-        x : torch.Tensor
-            Atari state with shape:
-            (batch_size, 4, 84, 84)
-
-        Returns
-        -------
-        torch.Tensor
-            Q-values for all actions.
-        """
-
-        # Atari frames may arrive as uint8 values from 0-255.
-        # Convert to floating point and normalize to 0-1.
+        # Normalize the uint8 pixels stored in replay.
         x = x.float() / 255.0
 
         x = F.relu(self.conv1(x))
@@ -75,10 +50,7 @@ class DQN(nn.Module):
 
         x = F.relu(self.fc1(x))
 
-        # IMPORTANT:
-        # No ReLU on the final layer.
-        #
-        # Q-values may be positive or negative.
+        # No final ReLU: Q-values can be negative.
         q_values = self.fc2(x)
 
         return q_values
@@ -89,10 +61,7 @@ if __name__ == "__main__":
 
     model = DQN(num_actions)
 
-    # Fake batch:
-    # 32 states
-    # 4 stacked frames
-    # each frame 84 x 84
+    # Check the output shape with a batch of random frames.
     dummy_state = torch.randint(
         0,
         256,

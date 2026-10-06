@@ -1,7 +1,7 @@
-"""Experience replay for DQN, extending the group's deque-based implementation.
+"""Fixed-size replay buffer for Atari transitions.
 
 Stores (state, action, reward, next_state, terminated) and samples uniform batches.
-Only genuine termination disables bootstrapping; time-limit truncation does not.
+Only termination disables bootstrapping; a time limit does not.
 """
 from collections import deque
 import numpy as np
@@ -28,8 +28,7 @@ class ReplayBuffer:
         if not 0 < batch_size <= len(self):
             raise ValueError("batch_size must be between 1 and replay length")
         indices = self.rng.choice(len(self), batch_size, replace=False)
-        # A deque is not accepted by random.sample on modern Python. A snapshot
-        # also avoids repeated O(n) deque indexing when gathering a batch.
+        # Convert to a list once so sampled indices have direct access.
         population = list(self.buffer)
         states, actions, rewards, next_states, terminals = zip(
             *(population[int(i)] for i in indices))

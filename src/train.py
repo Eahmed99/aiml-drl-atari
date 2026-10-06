@@ -1,4 +1,4 @@
-"""Compact Atari DQN training: preprocessing, learning, plots and demos in one file."""
+"""Train DQN on Breakout and save logs, plots and screenshots."""
 import argparse
 import csv
 import importlib.metadata
@@ -67,10 +67,9 @@ def save_json(path, value):
 
 
 class FireOnReset(gym.Wrapper):
-    """Launch on reset. Later life losses force FIRE through choose_action().
+    """Launch the ball after reset; log that reward separately from replay.
 
-    Reset launch rewards are not replay transitions and are reported separately.
-    This game-specific helper is a documented educational deviation.
+    choose_action() handles FIRE after a life loss.
     """
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
