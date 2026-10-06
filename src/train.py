@@ -20,7 +20,7 @@ from .replay_buffer import ReplayBuffer
 
 ROOT = Path(__file__).resolve().parents[1]
 
-DEFAULT_CONFIG = {'environment': 'ALE/Breakout-v5', 'seed': 42, 'total_steps': 100000, 'gamma': 0.99, 'learning_rate': 0.00025, 'batch_size': 32, 'replay_capacity': 5000, 'learning_starts': 1000, 'train_frequency': 4, 'epsilon_start': 1.0, 'epsilon_end': 0.1, 'epsilon_decay_steps': 80000, 'sticky_actions': 0.0, 'fire_on_reset': True, 'max_raw_episode_steps': 108000, 'log_every': 1000, 'checkpoint_every': 10000, 'torch_threads': 2}
+DEFAULT_CONFIG = {'environment': 'ALE/Breakout-v5', 'seed': 42, 'total_steps': 5000, 'gamma': 0.99, 'learning_rate': 0.00025, 'batch_size': 32, 'replay_capacity': 5000, 'learning_starts': 1000, 'train_frequency': 4, 'epsilon_start': 1.0, 'epsilon_end': 0.1, 'epsilon_decay_steps': 4000, 'sticky_actions': 0.0, 'fire_on_reset': True, 'max_raw_episode_steps': 108000, 'log_every': 1000, 'checkpoint_every': 10000, 'torch_threads': 2}
 SMOKE_CONFIG = {'environment': 'ALE/Breakout-v5', 'seed': 42, 'total_steps': 2000, 'gamma': 0.99, 'learning_rate': 0.00025, 'batch_size': 32, 'replay_capacity': 5000, 'learning_starts': 500, 'train_frequency': 4, 'epsilon_start': 1.0, 'epsilon_end': 0.1, 'epsilon_decay_steps': 1500, 'sticky_actions': 0.0, 'fire_on_reset': True, 'max_raw_episode_steps': 10800, 'log_every': 250, 'checkpoint_every': 1000, 'torch_threads': 2}
 
 def load_config(path):

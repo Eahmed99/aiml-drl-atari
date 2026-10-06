@@ -39,7 +39,7 @@ The smoke run takes 2,000 agent steps and checks that training executes. It save
 
 Use a new output folder for each training or evaluation run. For example, change `my-smoke-01` to `my-smoke-02` when running it again.
 
-For the default 100,000-step run:
+For the default 5,000-step run:
 
 ```bash
 python -m src.train --out results/breakout
@@ -65,7 +65,7 @@ python -m src.train --plot-run results/breakout --evaluation results/evaluation
 
 The input is four grayscale 84×84 frames. The network has two convolutional layers with 16 and 32 filters, a 256-unit hidden layer and one output per action. Pixels stay as uint8 in replay and are divided by 255 in the network.
 
-Actions follow an epsilon-greedy policy. Epsilon decreases from 1.0 to 0.1 during the default run. Training uses batches of 32, gamma 0.99, RMSprop and MSE loss. Rewards are clipped for learning; the reported scores use the original rewards.
+Actions follow an epsilon-greedy policy. Epsilon decreases from 1.0 to 0.1 over the first 4,000 steps of the default 5,000-step run. Training uses batches of 32, gamma 0.99, RMSprop and MSE loss. Rewards are clipped for learning; the reported scores use the original rewards.
 
 The TD target uses the same network, with gradients disabled for the next-state prediction. There is no separate target network. A true terminal state removes the future-reward term; a time limit ends the episode without removing that term.
 
